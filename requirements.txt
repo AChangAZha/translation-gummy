@@ -1,0 +1,8 @@
+Flask==3.0.0
+flask_cors==4.0.0
+peewee==3.17.0
+Requests==2.31.0
+requests_toolbelt==1.0.0
+srt==3.5.3
+pymysql
+kaggle

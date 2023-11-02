@@ -32,6 +32,7 @@ class WorkModel(BaseModel):
     sort_name = CharField(unique=True, null=True)
     block = BooleanField(default=False)
     transcribe_only = BooleanField(default=False)
+    word_timestamps = BooleanField(default=True)
     ai_translate = BooleanField(default=False)
     transcribe_initial_prompt = TextField()
     translate_prompt_name = CharField()
@@ -133,6 +134,7 @@ def create_task(
     origin_subtitle_path,
     translated_subtitle_path,
     transcribe_only,
+    word_timestamps,
     series_id=None,
 ):
     return TaskModel.create(
@@ -144,6 +146,7 @@ def create_task(
         origin_subtitle_path=origin_subtitle_path,
         translated_subtitle_path=translated_subtitle_path,
         transcribe_only=transcribe_only,
+        word_timestamps=word_timestamps,
         series_id=series_id,
     )
 

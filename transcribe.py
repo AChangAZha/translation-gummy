@@ -12,6 +12,7 @@ transcribe_log_file = open("transcribe.log", "w")
 origin_subtitle_base_path = ""
 tmp_subtitle_base_path = ""
 url = os.environ.get("URL", "")
+word_timestamps = os.environ.get("WORD_TIMESTAMPS", True)
 
 
 def get_task():
@@ -120,7 +121,7 @@ def transcribe(dir, split_transcribes=None, split_parts=[], initial_prompt=""):
         )
         run_cmd(
             f'cd faster-whisper-webui/ && python cli.py "../{dir}/{f}" '
-            + f"--output_dir ../{dir} --model large-v2 --vad none --word_timestamps True"
+            + f"--output_dir ../{dir} --model large-v2 --vad none --word_timestamps {word_timestamps} "
             + f'{(" --initial_prompt " + f_initial_prompt) if f_initial_prompt != "" else ""}'
         )
     for f in os.listdir(dir):
@@ -169,6 +170,7 @@ try:
         if task is None:
             exit(0)
         url = task.url
+        word_timestamps = task.word_timestamps
     info_json = download_file(url)
     md5 = hashlib.md5(open("video/" + os.listdir("video")[0], "rb").read()).hexdigest()
     get_chapters()

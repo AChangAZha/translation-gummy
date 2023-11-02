@@ -28,6 +28,7 @@ def create_task():
         return flask.jsonify({"error": "Invalid URL"}), 400
     copy_url = url
     transcribe_only = flask.request.json.get("transcribe_only", False)
+    word_timestamps = flask.request.json.get("word_timestamps", True)
     translate_engine = flask.request.json.get("translate_engine", "google")
     kaggle_username = flask.request.json.get("kaggle_username", "")
     kaggle_key = flask.request.json.get("kaggle_key", "")
@@ -124,6 +125,7 @@ def create_task():
                     origin_subtitle_path,
                     subtitle_path + ".zh-CN.srt",
                     transcribe_only,
+                    word_timestamps,
                     series_id,
                 )
                 print(f"Create task {id}, URL: {url}")
@@ -157,6 +159,7 @@ def create_task():
                 origin_subtitle_path,
                 "",
                 transcribe_only,
+                word_timestamps,
                 work.id,
             )
             print(f"Create task {id}, URL: {url}")

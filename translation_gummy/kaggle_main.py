@@ -1,4 +1,5 @@
 url = ""
+word_timestamps = True
 import subprocess
 import os
 from kaggle_secrets import UserSecretsClient
@@ -6,6 +7,7 @@ from kaggle_secrets import UserSecretsClient
 
 def init():
     os.environ["URL"] = url
+    os.environ["WORD_TIMESTAMPS"] = word_timestamps
     if url == "":
         os.environ["DB_NAME"] = UserSecretsClient().get_secret("DB_NAME")
         os.environ["DB_USER"] = UserSecretsClient().get_secret("DB_USER")

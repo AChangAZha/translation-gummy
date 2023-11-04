@@ -1,11 +1,12 @@
 import flask
 import os
-from urllib.parse import urlparse, unquote
+from urllib.parse import urlparse, unquote, quote
 import hashlib
 import datetime
 from flask_cors import CORS, cross_origin
-from translation_gummy import alist, database, run_task
+from translation_gummy import alist, database, run_task, onedrive
 from translation_gummy.utils import is_audio_file_or_video_file
+import uuid
 
 
 app = flask.Flask(__name__)
@@ -18,6 +19,7 @@ if cros_origin == [""]:
 cors = CORS(app, resources={r"/api/*": {"origins": cros_origin}})
 video_exts = [".mp4", ".mkv", ".avi", ".rmvb", ".flv", ".mov", ".webm"]
 tmp_subtitle_base_path = os.environ.get("TMP_SUBTITLE_BASE_PATH")
+tmp_video_base_path = os.environ.get("TMP_VIDEO_BASE_PATH")
 
 
 @cross_origin()
@@ -173,7 +175,9 @@ def create_task():
                 if str(task.task_id) == str(last_task.task_id):
                     return get_json(last_task)
         if kaggle_status != "running" and task.transcribe_status == "priority":
-            if not run_task.run_transcribe(copy_url, kaggle_username, kaggle_key):
+            if not run_task.run_transcribe(
+                copy_url, kaggle_username, kaggle_key, word_timestamps
+            ):
                 task.transcribe_status = "failed"
                 task.message = "Kaggle API error"
                 task.save()
@@ -200,6 +204,7 @@ def get_json(task):
             "origin_subtitle_path": task.origin_subtitle_path,
             "translated_subtitle_path": task.translated_subtitle_path,
             "transcribe_only": task.transcribe_only,
+            "word_timestamps": task.word_timestamps,
             "create_time": task.create_time,
             "update_time": task.update_time,
             "video_url": task.video_url,
@@ -220,6 +225,30 @@ def get_task():
     if task is None:
         return flask.jsonify({"error": "Not found"}), 404
     return get_json(task)
+
+
+@cross_origin()
+@app.route("/api/video", methods=["POST"])
+def upload_video():
+    file_name = flask.request.json.get("file_name", "")
+    file_md5 = flask.request.json.get("file_md5", "")
+    if file_name == "" or file_md5 == "":
+        return flask.jsonify({"error": "Invalid file"}), 400
+    task = database.get_task_by_file_md5(file_md5)
+    if task is not None:
+        return flask.jsonify({"video_url": task.url, "upload_url": ""})
+    ramdom_name = str(uuid.uuid4())
+    upload_folder = os.path.join(tmp_video_base_path, ramdom_name)
+    upload_folder_id = onedrive.create_folder(upload_folder).get("id", "")
+    if upload_folder_id == "":
+        return flask.jsonify({"error": "Create folder failed"}), 500
+    upload_url = onedrive.create_upload_session(upload_folder_id, file_name).get(
+        "uploadUrl", ""
+    )
+    if upload_url == "":
+        return flask.jsonify({"error": "Create upload session failed"}), 500
+    video_url = f"{alist_host}{upload_folder}/{quote(file_name)}"
+    return flask.jsonify({"video_url": video_url, "upload_url": upload_url})
 
 
 def check_task(

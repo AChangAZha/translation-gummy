@@ -44,7 +44,10 @@ def run_cmd(cmd, env):
 
 
 def run_transcribe(
-    url="", kaggle_username=env_kaggle_username, kaggle_key=env_kaggle_key
+    url="",
+    kaggle_username=env_kaggle_username,
+    kaggle_key=env_kaggle_key,
+    word_timestamps=True,
 ):
     uuid_str = str(uuid.uuid4())
     os.mkdir(f"/tmp/{uuid_str}")
@@ -55,6 +58,7 @@ def run_transcribe(
     with open(Path(__file__).with_name("kaggle_main.py"), "r") as f:
         lines = f.readlines()
         lines[0] = f'url = "{url}"\n'
+        lines[1] = f"word_timestamps = {word_timestamps}\n"
         with open(f"/tmp/{uuid_str}/kaggle_main.py", "w") as new_f:
             new_f.writelines(lines)
     if (

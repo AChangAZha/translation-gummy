@@ -32,7 +32,6 @@ class WorkModel(BaseModel):
     sort_name = CharField(unique=True, null=True)
     block = BooleanField(default=False)
     transcribe_only = BooleanField(default=False)
-    word_timestamps = BooleanField(default=True)
     ai_translate = BooleanField(default=False)
     transcribe_initial_prompt = TextField()
     translate_prompt_name = CharField()
@@ -62,6 +61,7 @@ class TaskModel(BaseModel):
     series_id = ForeignKeyField(WorkModel, backref="tasks", null=True)
     video_url = CharField(max_length=1024)
     message = TextField()
+    word_timestamps = BooleanField(default=True)
 
 
 class ReplaceOriginSubtitleModel(BaseModel):

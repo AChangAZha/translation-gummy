@@ -50,6 +50,8 @@ def run_transcribe(
     kaggle_key=env_kaggle_key,
     word_timestamps=True,
 ):
+    if url == "" and database.get_top_transcribe_task() is None:
+        return False
     uuid_str = str(uuid.uuid4())
     os.mkdir(f"/tmp/{uuid_str}")
     copy_env = get_copy_env(kaggle_username, kaggle_key)

@@ -8,3 +8,13 @@ def is_audio_file_or_video_file(file_path):
     ):
         return True
     return False
+
+
+def check_white_keyword(keywords, text):
+    for keyword in keywords:
+        if keyword.block:
+            continue
+        else:
+            if keyword.keyword in text:
+                return True
+    return False

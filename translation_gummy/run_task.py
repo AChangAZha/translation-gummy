@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 from . import database
 from . import onedrive
+from .utils import check_white_keyword
 
 
 env_kaggle_username = os.environ.get("KAGGLE_USERNAME", "")
@@ -131,12 +132,19 @@ def get_priority_transcribe(kaggle_username, kaggle_key):
     file_md5 = info_json["file_md5"]
     url = info_json["url"]
     message = info_json["message"]
+    info = info_json["info"]
     task_redirect = database.get_task_by_file_md5(file_md5)
     task = database.get_task_by_url(url)
     if task is None:
         return None
     if task.transcribe_status != "priority" or task.redirect != "":
         return None
+    hit_white_keyword = True
+    series = database.get_work_by_id(task.series_id)
+    keywords = []
+    if series is not None and series.check_keyword:
+        keywords = database.get_white_keywords()
+        hit_white_keyword = check_white_keyword(keywords, str(info))
     try:
         if message != "":
             raise Exception(message)
@@ -161,6 +169,11 @@ def get_priority_transcribe(kaggle_username, kaggle_key):
                 video_file = file
             elif file.endswith(".srt"):
                 srt_file = file
+                if not hit_white_keyword:
+                    srt_text = open(f"{output_dir}/video/{file}", "r").read()
+                    hit_white_keyword = check_white_keyword(keywords, srt_text)
+        if not hit_white_keyword:
+            raise Exception("该视频暂不支持。")
         if video_file is None or srt_file is None:
             raise Exception("No video or srt file found")
         task.file_md5 = file_md5

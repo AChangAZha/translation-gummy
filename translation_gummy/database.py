@@ -38,6 +38,7 @@ class WorkModel(BaseModel):
     translate_prompt_description = CharField()
     metadata = TextField()
     series = BooleanField(default=True)
+    check_keyword = BooleanField(default=False)
 
 
 class KeywordModel(BaseModel):
@@ -113,6 +114,14 @@ class ReplaceTranslationModel(BaseModel):
     work_id = ForeignKeyField(WorkModel, backref="replace_translations")
     word = CharField()
     replace_word = CharField()
+
+
+def get_white_keywords() -> list:
+    try:
+        query = KeywordModel.select().where(KeywordModel.block == False)
+        return list(query)
+    except DoesNotExist:
+        return []
 
 
 def get_task(task_id) -> TaskModel:
@@ -295,6 +304,7 @@ db.create_tables(
         SplitTranslateModel,
         ReplaceWordModel,
         ReplaceTranslationModel,
+        KeywordModel,
     ],
     safe=True,
 )

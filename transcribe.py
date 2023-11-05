@@ -5,14 +5,14 @@ import json
 import os
 import urllib.parse as urlparse
 from urllib.parse import urlencode
-from translation_gummy.utils import is_audio_file_or_video_file
+from translation_gummy.utils import is_audio_file_or_video_file, check_white_keyword
 
 
 transcribe_log_file = open("transcribe.log", "w")
 origin_subtitle_base_path = ""
 tmp_subtitle_base_path = ""
 url = os.environ.get("URL", "")
-word_timestamps = os.environ.get("WORD_TIMESTAMPS", True)
+word_timestamps = os.environ.get("WORD_TIMESTAMPS", "True") == "True"
 
 
 def get_task():
@@ -184,6 +184,8 @@ try:
         split_transcribes = None
         transcribe_initial_prompt = ""
         words = []
+        hit_white_keyword = True
+        keywords = []
         if series is not None:
             split_transcribes = series.split_transcribes
             split_parts = split_video(series, split_transcribes)
@@ -194,11 +196,19 @@ try:
                 series.replace_words,
             )
             words = list(words) if words is not None else []
+            if series.check_keyword:
+                keywords = database.get_white_keywords()
+                hit_white_keyword = check_white_keyword(keywords, str(info_json))
         transcribe(dir, split_transcribes, split_parts, transcribe_initial_prompt)
         replace_word(dir, words, transcribe_log_file)
         merge_subtitle(dir, split_parts, f"{file_extension}-subs")
         rename_subtitle(dir, filename, file_extension, split_parts)
         replace_subtitles("video", filename, series)
+        if not hit_white_keyword:
+            srt_text = open(f"video/{filename}.whisper.srt", "r").read()
+            hit_white_keyword = check_white_keyword(keywords, srt_text)
+        if not hit_white_keyword:
+            raise Exception("该视频暂不支持。")
         upload_transcribe(
             task, filename, tmp_subtitle_base_path, origin_subtitle_base_path
         )

@@ -113,7 +113,8 @@ def transcribe(dir, split_transcribes=None, split_parts=[], initial_prompt=""):
         initial_prompts = [part.transcribe_initial_prompt for part in split_transcribes]
     else:
         initial_prompts = [initial_prompt]
-    for i, f in enumerate(os.listdir(dir)):
+    files = os.listdir(dir).sort()
+    for i, f in enumerate(files):
         f_initial_prompt = (
             ('"' + initial_prompts[i] + '"')
             if initial_prompts[i] != ""

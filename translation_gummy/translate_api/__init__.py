@@ -48,7 +48,7 @@ def gpt_translate(file_path, target_language, api_key, movie_name, description):
         + f'"{file_path}" --ratelimit 5 --apikey {api_key} --target_language "{target_language}" '
         + f'--output "{output_file}" --instructionfile "{Path(__file__).with_name("instructions.txt")}" '
         + (
-            f'-m "{movie_name}" '
+            f'--moviename "{movie_name}" '
             if (movie_name is not None and movie_name != "")
             else ""
         )

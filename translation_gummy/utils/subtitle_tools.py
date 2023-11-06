@@ -135,6 +135,7 @@ def split(series, split_info, detailed_chapters):
         return []
     chapters = list(series.chapters) if series.chapters is not None else []
     split_parts = []
+    chapters_title = []
     for part in split_info:
         if part.start_no == 0:
             start_time = part.start_time
@@ -144,5 +145,8 @@ def split(series, split_info, detailed_chapters):
         else:
             start_time = format_time(detailed_chapters[part.start_no - 1]["start_time"])
             end_time = format_time(detailed_chapters[part.end_no - 1]["end_time"])
+            chapters_title.append(
+                detailed_chapters[part.start_no - 1].get("tags", {}).get("title", "")
+            )
         split_parts.append((start_time, end_time))
-    return split_parts
+    return split_parts, chapters_title

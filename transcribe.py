@@ -92,12 +92,12 @@ def split_video(series, split_transcribes):
     run_cmd("mkdir split")
     with open("chapters.json") as f:
         detailed_chapters = json.load(f)["chapters"]
-    split_parts = split(series, split_transcribes, detailed_chapters)
+    split_parts, chapters_title = split(series, split_transcribes, detailed_chapters)
     for i, part in enumerate(split_parts):
         run_cmd(
             f'ffmpeg -i "video/$(ls video/)" -ss {part[0]} -to {part[1]} -c copy -copyts -avoid_negative_ts make_zero -y "split/{i}.mp4"'
         )
-    return split_parts
+    return split_parts, chapters_title
 
 
 def install_transcribe_dependencies():
@@ -105,13 +105,19 @@ def install_transcribe_dependencies():
     run_cmd("cd faster-whisper-webui/ && pip install -r requirements.txt")
 
 
-def transcribe(dir, split_transcribes=None, split_parts=[], initial_prompt=""):
+def transcribe(
+    dir, split_transcribes=None, split_parts=[], initial_prompt="", chapters_title=[]
+):
     if split_transcribes is not None:
         split_transcribes = list(split_transcribes)
     else:
         split_transcribes = []
     if len(split_transcribes) > 0 and len(split_transcribes) == len(split_parts):
-        initial_prompts = [part.transcribe_initial_prompt for part in split_transcribes]
+        initial_prompts = (
+            [part.transcribe_initial_prompt for part in split_transcribes]
+            if chapters_title == []
+            else chapters_title
+        )
     else:
         initial_prompts = [initial_prompt]
     files = os.listdir(dir)
@@ -189,9 +195,11 @@ try:
         words = []
         hit_white_keyword = True
         keywords = []
+        auto_prompt = False
+        chapters_title = []
         if series is not None:
             split_transcribes = series.split_transcribes
-            split_parts = split_video(series, split_transcribes)
+            split_parts, chapters_title = split_video(series, split_transcribes)
             if os.path.exists("split") and os.listdir("split"):
                 dir = "split"
             transcribe_initial_prompt = series.transcribe_initial_prompt
@@ -202,13 +210,21 @@ try:
             if series.check_keyword:
                 keywords = database.get_white_keywords()
                 hit_white_keyword = check_white_keyword(keywords, str(info_json))
-        transcribe(dir, split_transcribes, split_parts, transcribe_initial_prompt)
+            auto_prompt = series.auto_prompt
+        detailed_chapters = []
+        with open("chapters.json") as f:
+            detailed_chapters = json.load(f)["chapters"]
+        transcribe(
+            dir,
+            split_transcribes,
+            split_parts,
+            transcribe_initial_prompt,
+            chapters_title if auto_prompt else [],
+        )
         replace_word(dir, words, transcribe_log_file)
         merge_subtitle(dir, split_parts, f"{file_extension}-subs")
         rename_subtitle(dir, filename, file_extension, split_parts)
-        with open("chapters.json") as f:
-            detailed_chapters = json.load(f)["chapters"]
-            replace_subtitles("video", filename, series, detailed_chapters)
+        replace_subtitles("video", filename, series, detailed_chapters)
         if not hit_white_keyword:
             srt_text = open(f"video/{filename}.whisper.srt", "r").read()
             hit_white_keyword = check_white_keyword(keywords, srt_text)

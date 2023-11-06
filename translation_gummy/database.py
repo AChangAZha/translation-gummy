@@ -39,6 +39,7 @@ class WorkModel(BaseModel):
     metadata = TextField()
     series = BooleanField(default=True)
     check_keyword = BooleanField(default=False)
+    auto_prompt = BooleanField(default=False)
 
 
 class KeywordModel(BaseModel):

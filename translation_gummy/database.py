@@ -68,13 +68,15 @@ class TaskModel(BaseModel):
 class ReplaceOriginSubtitleModel(BaseModel):
     work_id = ForeignKeyField(WorkModel, backref="replace_origin_subtitles")
     url = CharField(max_length=1024)
-    start_time = CharField(default="00:00:00.000")
+    start_time = CharField(default="00:00:00.000", null=True)
+    start_no = IntegerField(default=0)
 
 
 class ReplaceTranslationSubtitleModel(BaseModel):
     work_id = ForeignKeyField(WorkModel, backref="replace_translation_subtitles")
     url = CharField(max_length=1024)
-    start_time = CharField(default="00:00:00.000")
+    start_time = CharField(default="00:00:00.000", null=True)
+    start_no = IntegerField(default=0)
 
 
 class ChapterModel(BaseModel):

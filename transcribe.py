@@ -203,7 +203,9 @@ try:
         replace_word(dir, words, transcribe_log_file)
         merge_subtitle(dir, split_parts, f"{file_extension}-subs")
         rename_subtitle(dir, filename, file_extension, split_parts)
-        replace_subtitles("video", filename, series)
+        with open("chapters.json") as f:
+            detailed_chapters = json.load(f)["chapters"]
+            replace_subtitles("video", filename, series, detailed_chapters)
         if not hit_white_keyword:
             srt_text = open(f"video/{filename}.whisper.srt", "r").read()
             hit_white_keyword = check_white_keyword(keywords, srt_text)

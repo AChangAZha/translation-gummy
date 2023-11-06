@@ -128,7 +128,9 @@ try:
         .get("chapters", [])
     )
     split_parts = split_subtitle(
-        series, f"subs/{task.task_id}/subtitles/{origin_subtitle_name}", detailed_chapters
+        series,
+        f"subs/{task.task_id}/subtitles/{origin_subtitle_name}",
+        detailed_chapters,
     )
     dir = f"subs/{task.task_id}/subtitles"
     if len(split_parts) != 0:
@@ -164,7 +166,11 @@ try:
             f"{dir}/subtitles/{origin_subtitle_name_without_ext}.{target_language}.srt",
         )
     replace_subtitles(
-        f"{dir}/subtitles", origin_subtitle_name_without_ext, series, detailed_chapters,target_language
+        f"{dir}/subtitles",
+        origin_subtitle_name_without_ext,
+        series,
+        detailed_chapters,
+        target_language,
     )
     onedrive.upload_translate(
         task,

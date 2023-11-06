@@ -53,7 +53,11 @@ def merge_subtitle(dir, split_parts, file_extension):
 
 
 def replace_subtitles(
-    dir, origin_file_name_without_extension, series, detailed_chapters, target_language="whisper"
+    dir,
+    origin_file_name_without_extension,
+    series,
+    detailed_chapters,
+    target_language="whisper",
 ):
     if series is None:
         return
@@ -77,12 +81,20 @@ def replace_subtitles(
         end_time = None
         for i, sub in enumerate(srt_file):
             if replace_subtitle.start_no == 0:
-                delta = datetime.timedelta(seconds=get_seconds(replace_subtitle.start_time))
+                delta = datetime.timedelta(
+                    seconds=get_seconds(replace_subtitle.start_time)
+                )
             elif len(detailed_chapters) != len(chapters):
                 return
             else:
                 delta = datetime.timedelta(
-                    seconds=get_seconds(format_time(detailed_chapters[replace_subtitle.start_no - 1]["start_time"]))
+                    seconds=get_seconds(
+                        format_time(
+                            detailed_chapters[replace_subtitle.start_no - 1][
+                                "start_time"
+                            ]
+                        )
+                    )
                 )
             sub.start += delta
             sub.end += delta

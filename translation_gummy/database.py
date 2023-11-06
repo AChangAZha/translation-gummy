@@ -239,7 +239,11 @@ def get_task_by_file_md5(file_md5) -> TaskModel:
 
 def get_work_by_path(task_path) -> WorkModel:
     try:
-        return WorkModel.get(fn.REGEXP_LIKE(task_path, WorkModel.path))
+        return (
+            WorkModel.select()
+            .order_by(fn.REGEXP_INSTR(task_path, WorkModel.path).desc())
+            .first()
+        )
     except DoesNotExist:
         return None
 

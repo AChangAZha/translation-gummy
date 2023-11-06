@@ -1,4 +1,5 @@
 import subprocess
+import traceback
 import os
 import hashlib
 import json
@@ -226,7 +227,7 @@ except Exception as e:
         task.transcribe_status = "failed"
         task.message = str(e)
         task.save()
-    transcribe_log_file.write(f"\nError: {e}\n")
+    transcribe_log_file.write(f"\n{traceback.format_exc()}\n")
 finally:
     with open("info.json", "w") as f:
         json.dump(

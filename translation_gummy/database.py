@@ -239,8 +239,7 @@ def get_task_by_file_md5(file_md5) -> TaskModel:
 
 def get_work_by_path(task_path) -> WorkModel:
     try:
-        work = WorkModel.select().where(fn.REGEXP(WorkModel.path, task_path)).get()
-        return work
+        return WorkModel.get(fn.REGEXP(WorkModel.path, task_path))
     except DoesNotExist:
         return None
 

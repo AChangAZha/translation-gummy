@@ -128,20 +128,20 @@ def replace_subtitles(
 
 
 def split(series, split_info, detailed_chapters):
+    chapters_title = []
     if split_info is None:
-        return []
+        return [], chapters_title
     split_info = list(split_info)
     if len(split_info) == 0:
-        return []
+        return [], chapters_title
     chapters = list(series.chapters) if series.chapters is not None else []
     split_parts = []
-    chapters_title = []
     for part in split_info:
         if part.start_no == 0:
             start_time = part.start_time
             end_time = part.end_time
         elif len(detailed_chapters) != len(chapters):
-            return []
+            return [], chapters_title
         else:
             start_time = format_time(detailed_chapters[part.start_no - 1]["start_time"])
             end_time = format_time(detailed_chapters[part.end_no - 1]["end_time"])

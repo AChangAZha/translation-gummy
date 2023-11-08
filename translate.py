@@ -1,4 +1,5 @@
 import shutil
+import traceback
 import requests
 import os
 from translation_gummy import translate_api
@@ -181,7 +182,7 @@ try:
     task.translate_status = "success"
     task.save()
 except Exception as e:
-    print(e)
+    print(traceback.format_exc())
     task.translate_status = "failed"
     task.message = str(e)
     task.save()

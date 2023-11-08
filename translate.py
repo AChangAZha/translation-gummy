@@ -35,7 +35,7 @@ def split_subtitle(series, srt_path, detailed_chapters):
     if series is None:
         return []
     split_translates = series.split_translates
-    split_parts = split(series, split_translates, detailed_chapters)
+    split_parts, _ = split(series, split_translates, detailed_chapters)
     subs = []
     srt_file = list(srt.parse(open(srt_path).read()))
     os.mkdir(f"subs/{task.task_id}/split")
